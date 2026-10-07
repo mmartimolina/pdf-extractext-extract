@@ -40,7 +40,7 @@ src/
 - Respuesta exitosa:
 
 ```json
-200 {"text": "...", "page_count": 2}
+200 {"content": "...", "page_count": 2}
 ```
 
 - Errores:
