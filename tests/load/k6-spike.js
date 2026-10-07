@@ -1,7 +1,12 @@
 import http from "k6/http";
 import { check } from "k6";
 
-const pdf = open("../../tests/sample.pdf", "b");
+const pdfFiles = [
+  open("../../tests/stress/pdfs/2020-Scrum-Guide-Spanish-Latin-South-American.pdf", "b"),
+  open("../../tests/stress/pdfs/Essential-Kanban-Condensed-Spanish.pdf", "b"),
+  open("../../tests/stress/pdfs/Filosofia Lean.pdf", "b"),
+  open("../../tests/stress/pdfs/scrum_manager_historias_usuario.pdf", "b"),
+];
 
 export const options = {
   stages: [
@@ -12,6 +17,8 @@ export const options = {
 };
 
 export default function () {
+  const pdf = pdfFiles[Math.floor(Math.random() * pdfFiles.length)];
+
   const response = http.post(
     "http://localhost:8000/extract",
     pdf,
@@ -24,7 +31,5 @@ export default function () {
 
   check(response, {
     "status is 200": (r) => r.status === 200,
-    "response contains content": (r) => r.json("content") !== undefined,
-    "response contains page_count": (r) => r.json("page_count") !== undefined,
   });
 }

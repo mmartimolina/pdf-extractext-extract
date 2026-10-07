@@ -23,3 +23,9 @@ def test_invalid_max_pdf_size_raises(monkeypatch):
 
     with pytest.raises(ValueError):
         load_settings()
+
+def test_non_positive_max_pdf_size_raises(monkeypatch):
+    monkeypatch.setenv("MAX_PDF_SIZE_BYTES", "0")
+
+    with pytest.raises(ValueError, match="must be positive"):
+        load_settings()
