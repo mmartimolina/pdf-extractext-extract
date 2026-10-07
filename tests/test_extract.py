@@ -17,7 +17,7 @@ def test_extract_returns_text_and_page_count(valid_pdf_bytes):
 
     assert response.status_code == 200
     data = response.json()
-    assert "Hello World" in data["text"]
+    assert "Hello World" in data["content"]
     assert data["page_count"] == 2
 
 

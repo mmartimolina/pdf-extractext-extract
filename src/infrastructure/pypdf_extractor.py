@@ -22,4 +22,4 @@ class PypdfTextExtractor:
             raise
         except Exception as exc:
             raise InvalidPdfError("The uploaded file is not a valid PDF") from exc
-        return ExtractedText(text=text, page_count=page_count)
+        return ExtractedText(content=text, page_count=page_count)

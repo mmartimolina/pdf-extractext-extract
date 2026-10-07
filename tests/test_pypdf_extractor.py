@@ -9,7 +9,7 @@ def test_adapter_extracts_text_and_page_count(valid_pdf_bytes):
 
     result = extractor.extract(valid_pdf_bytes)
 
-    assert "Hello World" in result.text
+    assert "Hello World" in result.content
     assert result.page_count == 2
 
 

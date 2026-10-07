@@ -70,5 +70,5 @@ async def extract(request: Request) -> JSONResponse:
 
     return JSONResponse(
         status_code=200,
-        content={"text": result.text, "page_count": result.page_count},
+        content={"content": result.content, "page_count": result.page_count},
     )

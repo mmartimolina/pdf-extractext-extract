@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ExtractedText:
-    text: str
+    content: str
     page_count: int

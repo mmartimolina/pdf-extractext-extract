@@ -11,7 +11,7 @@ class FakeExtractor:
 
     def extract(self, pdf_bytes: bytes) -> ExtractedText:
         self.received = pdf_bytes
-        return ExtractedText(text="fake text", page_count=3)
+        return ExtractedText(content="fake text", page_count=3)
 
 
 def make_service(max_size: int = 1024) -> tuple[ExtractionService, FakeExtractor]:
@@ -26,7 +26,7 @@ def test_service_delegates_to_extractor():
     result = service.extract_text(payload)
 
     assert extractor.received == payload
-    assert result == ExtractedText(text="fake text", page_count=3)
+    assert result == ExtractedText(content="fake text", page_count=3)
 
 
 def test_service_rejects_payload_over_size_limit():
