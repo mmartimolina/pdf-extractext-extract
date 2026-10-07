@@ -8,3 +8,5 @@ htmlcov/
 
 .agents/
 skills-lock.json
+
+results/
