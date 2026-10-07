@@ -1,42 +1,42 @@
-# Trabajo Práctico — Test de Carga y Stress sobre Microservicio
+# Trabajo Prï¿½ctico ï¿½ Test de Carga y Stress sobre Microservicio
 
-## 1. Introducción
+## 1. Introducciï¿½n
 
-El presente trabajo práctico aborda la transformación de una funcionalidad de extracción de texto desde archivos PDF en un microservicio independiente, stateless y preparado para ser sometido a pruebas de carga y stress.
+El presente trabajo prï¿½ctico aborda la transformaciï¿½n de una funcionalidad de extracciï¿½n de texto desde archivos PDF en un microservicio independiente, stateless y preparado para ser sometido a pruebas de carga y stress.
 
-El microservicio desarrollado recibe un archivo PDF mediante `POST /extract`, extrae su contenido textual y devuelve una respuesta JSON con el texto obtenido y la cantidad de páginas procesadas.
+El microservicio desarrollado recibe un archivo PDF mediante `POST /extract`, extrae su contenido textual y devuelve una respuesta JSON con el texto obtenido y la cantidad de pï¿½ginas procesadas.
 
-La implementación utiliza FastAPI y `pypdf`, se ejecuta mediante Docker y define límites explícitos de recursos mediante Docker Compose.
+La implementaciï¿½n utiliza FastAPI y `pypdf`, se ejecuta mediante Docker y define lï¿½mites explï¿½citos de recursos mediante Docker Compose.
 
 ## 2. Objetivo
 
 Los objetivos principales son:
 
-- Implementar un microservicio dedicado exclusivamente a la extracción de texto desde PDF.
+- Implementar un microservicio dedicado exclusivamente a la extracciï¿½n de texto desde PDF.
 - Mantener el servicio stateless.
 - Exponer el endpoint obligatorio `POST /extract`.
-- Validar entradas inválidas y archivos que superen el tamaño máximo permitido.
-- Contenerizar la aplicación mediante Docker.
-- Definir límites de CPU y memoria.
+- Validar entradas invï¿½lidas y archivos que superen el tamaï¿½o mï¿½ximo permitido.
+- Contenerizar la aplicaciï¿½n mediante Docker.
+- Definir lï¿½mites de CPU y memoria.
 - Ejecutar pruebas de carga mediante k6 y Vegeta.
-- Analizar las métricas obtenidas.
-- Dejar documentado el procedimiento de ejecución y evaluación.
+- Analizar las mï¿½tricas obtenidas.
+- Dejar documentado el procedimiento de ejecuciï¿½n y evaluaciï¿½n.
 
 ## 3. Arquitectura
 
-La solución separa la responsabilidad de extracción en diferentes capas:
+La soluciï¿½n separa la responsabilidad de extracciï¿½n en diferentes capas:
 
 ```text
 src/
 +-- api/
-¦   +-- routes.py
+ï¿½   +-- routes.py
 +-- service/
-¦   +-- extraction.py
+ï¿½   +-- extraction.py
 +-- infrastructure/
-¦   +-- pypdf_extractor.py
+ï¿½   +-- pypdf_extractor.py
 +-- domain/
-¦   +-- models.py
-¦   +-- errors.py
+ï¿½   +-- models.py
+ï¿½   +-- errors.py
 +-- config.py
 +-- main.py
 4. Endpoint principal
@@ -55,7 +55,7 @@ Respuesta exitosa:
 }
 GET /health
 
-Se implementó un endpoint de healthcheck:
+Se implementï¿½ un endpoint de healthcheck:
 
 GET /health
 
@@ -65,22 +65,22 @@ que permite verificar que el servicio se encuentra operativo.
 
 El microservicio contempla:
 
-Validación del tipo MIME application/pdf.
-Rechazo de requests con body vacío.
-Límite configurable de tamaño mediante MAX_PDF_SIZE_BYTES.
+Validaciï¿½n del tipo MIME application/pdf.
+Rechazo de requests con body vacï¿½o.
+Lï¿½mite configurable de tamaï¿½o mediante MAX_PDF_SIZE_BYTES.
 Valor predeterminado de 20 MB.
-Rechazo temprano cuando el Content-Length supera el límite.
-Control del tamaño también durante la lectura del body.
-Detección de PDFs inválidos o corruptos.
+Rechazo temprano cuando el Content-Length supera el lï¿½mite.
+Control del tamaï¿½o tambiï¿½n durante la lectura del body.
+Detecciï¿½n de PDFs invï¿½lidos o corruptos.
 Manejo de PDFs cifrados que no pueden procesarse.
 
 Estas validaciones evitan procesar entradas que no cumplen el contrato del servicio y reducen el consumo innecesario de recursos.
 
 6. Procesamiento
 
-La extracción se realiza utilizando pypdf.
+La extracciï¿½n se realiza utilizando pypdf.
 
-Debido a que la operación de extracción es síncrona, se ejecuta fuera del event loop mediante un threadpool. De esta forma, una extracción PDF no bloquea directamente el event loop de FastAPI.
+Debido a que la operaciï¿½n de extracciï¿½n es sï¿½ncrona, se ejecuta fuera del event loop mediante un threadpool. De esta forma, una extracciï¿½n PDF no bloquea directamente el event loop de FastAPI.
 
 El servicio no persiste los archivos ni los resultados.
 
@@ -89,23 +89,23 @@ El servicio no persiste los archivos ni los resultados.
 Se implementaron pruebas automatizadas para:
 
 Healthcheck.
-Extracción exitosa.
-Validación del content type.
-Body vacío.
-PDF inválido.
+Extracciï¿½n exitosa.
+Validaciï¿½n del content type.
+Body vacï¿½o.
+PDF invï¿½lido.
 PDF cifrado.
-Límite de tamaño.
-Validación mediante Content-Length.
-Lectura del body excediendo el límite.
-Servicio de extracción.
+Lï¿½mite de tamaï¿½o.
+Validaciï¿½n mediante Content-Length.
+Lectura del body excediendo el lï¿½mite.
+Servicio de extracciï¿½n.
 Adaptador pypdf.
-Configuración.
+Configuraciï¿½n.
 
-Los tests permiten verificar tanto la lógica de negocio como el comportamiento HTTP del microservicio.
+Los tests permiten verificar tanto la lï¿½gica de negocio como el comportamiento HTTP del microservicio.
 
 8. Docker
 
-La aplicación se contiene mediante un Dockerfile basado en Python 3.13 slim.
+La aplicaciï¿½n se contiene mediante un Dockerfile basado en Python 3.13 slim.
 
 El contenedor:
 
@@ -121,7 +121,7 @@ El servicio puede iniciarse mediante:
 docker compose up --build
 9. Recursos
 
-Docker Compose establece los siguientes límites por instancia:
+Docker Compose establece los siguientes lï¿½mites por instancia:
 
 deploy:
   resources:
@@ -129,7 +129,7 @@ deploy:
       cpus: "1.0"
       memory: 1G
 
-Además, se configura:
+Ademï¿½s, se configura:
 
 MAX_PDF_SIZE_BYTES=20971520
 
@@ -140,7 +140,7 @@ El servicio posee un healthcheck contra:
 GET /health
 10. Prueba funcional en Docker
 
-Se verificó el funcionamiento real del contenedor utilizando un PDF de prueba.
+Se verificï¿½ el funcionamiento real del contenedor utilizando un PDF de prueba.
 
 Request:
 
@@ -159,101 +159,101 @@ Esto confirma que el endpoint funciona correctamente dentro del contenedor.
 
 11. Prueba de carga con k6
 
-Se configuró un escenario Spike Test con:
+Se configurï¿½ un escenario Spike Test con:
 
 10 segundos hasta 100 VUs.
 20 segundos manteniendo 100 VUs.
 10 segundos de descenso hasta 0 VUs.
-Duración total: 40 segundos.
+Duraciï¿½n total: 40 segundos.
 
-La configuración se encuentra en:
+La configuraciï¿½n se encuentra en:
 
 tests/load/k6-spike.js
 Resultado registrado
 
-En una ejecución de 40 segundos se obtuvieron:
+En una ejecuciï¿½n de 40 segundos se obtuvieron:
 
-Métrica    Resultado
+Mï¿½trica    Resultado
 Iteraciones    6.976
 Requests aproximadas    6.976
 Throughput    174,37 req/s
-VUs máximos    100
+VUs mï¿½ximos    100
 p50    483,22 ms
 p90    763,86 ms
 p95    816,39 ms
-Máximo    1,06 s
+Mï¿½ximo    1,06 s
 Requests fallidas    0%
 Checks exitosos    100%
 
-Estos resultados fueron obtenidos utilizando tests/sample.pdf, un PDF pequeño de prueba de 852 bytes.
+Estos resultados fueron obtenidos utilizando tests/sample.pdf, un PDF pequeï¿½o de prueba de 852 bytes.
 
-Por lo tanto, no deben interpretarse como equivalentes al benchmark realizado con los PDFs oficiales de stress del trabajo práctico.
+Por lo tanto, no deben interpretarse como equivalentes al benchmark realizado con los PDFs oficiales de stress del trabajo prï¿½ctico.
 
-12. Prueba de carga con Vegeta
+## 12. Prueba de carga con Vegeta
 
-Se ejecutó una carga constante de:
+Se ejecutÃ³ una carga constante de:
 
-50 requests/segundo
-durante 30 segundos
+- 50 requests por segundo
+- durante 30 segundos
+- total: 1500 requests
 
-Esto produjo un total esperado de aproximadamente:
+### Resultado obtenido
 
-50 × 30 = 1500 requests
-Resultado obtenido
-Métrica    Resultado
-Requests    1500
-Rate    50,03 req/s
-Throughput    50,02 req/s
-Duración    29,987 s
-Latencia mínima    5,035 ms
-Latencia media    15,133 ms
-p50    9,696 ms
-p90    17,776 ms
-p95    45,446 ms
-p99    135,9 ms
-Máxima    240,785 ms
-Éxito    100%
-HTTP 200    1500
-Errores    0
+| MÃ©trica | Resultado |
+|---|---:|
+| Requests | 1500 |
+| Rate | 50,03 req/s |
+| Throughput | 50,02 req/s |
+| DuraciÃ³n | 29,985 s |
+| Latencia mÃ­nima | 4,273 ms |
+| Latencia media | 5,304 ms |
+| p50 | 5,049 ms |
+| p90 | 6,201 ms |
+| p95 | 6,651 ms |
+| p99 | 8,235 ms |
+| MÃ¡xima | 25,652 ms |
+| Ã‰xito | 100% |
+| HTTP 200 | 1500 |
+| Errores | 0 |
 
 El reporte completo se encuentra en:
 
-tests/load/vegeta-report.txt
+`tests/load/vegeta-report.txt`
 
-Al igual que en la prueba de k6, esta ejecución utilizó un PDF pequeño de prueba de 852 bytes.
+La prueba utilizÃ³ `tests/sample.pdf`, un archivo de 852 bytes.
 
-13. Análisis
+13. Anï¿½lisis
 
-Los resultados obtenidos muestran que, para el PDF pequeño utilizado durante estas pruebas, el servicio pudo sostener una carga constante de aproximadamente 50 requests por segundo durante 30 segundos sin registrar errores HTTP.
+Los resultados obtenidos muestran que, para el PDF pequeï¿½o utilizado durante estas pruebas, el servicio pudo sostener una carga constante de aproximadamente 50 requests por segundo durante 30 segundos sin registrar errores HTTP.
 
-En la prueba Spike también se alcanzaron 100 usuarios virtuales sin errores, manteniendo el porcentaje de checks exitosos en 100%.
+En la prueba Spike tambiï¿½n se alcanzaron 100 usuarios virtuales sin errores, manteniendo el porcentaje de checks exitosos en 100%.
 
-Sin embargo, el tamaño del PDF tiene una influencia importante sobre el costo de extracción. Por este motivo, estos resultados no permiten concluir por sí solos el comportamiento del sistema frente a los PDFs de mayor tamaño incluidos en el conjunto oficial de stress.
+Sin embargo, el tamaï¿½o del PDF tiene una influencia importante sobre el costo de extracciï¿½n. Por este motivo, estos resultados no permiten concluir por sï¿½ solos el comportamiento del sistema frente a los PDFs de mayor tamaï¿½o incluidos en el conjunto oficial de stress.
 
-Para una evaluación representativa del escenario final sería necesario ejecutar nuevamente las pruebas utilizando los archivos PDF oficiales proporcionados para el trabajo práctico.
+Para una evaluaciï¿½n representativa del escenario final serï¿½a necesario ejecutar nuevamente las pruebas utilizando los archivos PDF oficiales proporcionados para el trabajo prï¿½ctico.
 
 14. Consideraciones de escalabilidad
 
-La arquitectura propuesta permite ejecutar múltiples instancias del microservicio debido a que no depende de estado local persistente.
+La arquitectura propuesta permite ejecutar mï¿½ltiples instancias del microservicio debido a que no depende de estado local persistente.
 
-El servicio no utiliza sesiones ni almacenamiento compartido para procesar una extracción.
+El servicio no utiliza sesiones ni almacenamiento compartido para procesar una extracciï¿½n.
 
-Por lo tanto, puede ser colocado detrás de un balanceador o reverse proxy y escalar horizontalmente mediante múltiples réplicas.
+Por lo tanto, puede ser colocado detrï¿½s de un balanceador o reverse proxy y escalar horizontalmente mediante mï¿½ltiples rï¿½plicas.
 
-Docker Compose permite definir la instancia y sus límites de recursos. La estrategia de escalamiento horizontal puede utilizar hasta cinco réplicas según los requisitos del trabajo práctico.
+Docker Compose permite definir la instancia y sus lï¿½mites de recursos. La estrategia de escalamiento horizontal puede utilizar hasta cinco rï¿½plicas segï¿½n los requisitos del trabajo prï¿½ctico.
 
 15. Posibles optimizaciones
 
-Como líneas futuras de optimización se consideran:
+Como lï¿½neas futuras de optimizaciï¿½n se consideran:
 
-Ejecutar múltiples réplicas detrás de un balanceador.
-Controlar la concurrencia de extracción.
+Ejecutar mï¿½ltiples rï¿½plicas detrï¿½s de un balanceador.
+Controlar la concurrencia de extracciï¿½n.
 Incorporar backpressure.
-Rechazar nuevas solicitudes cuando la cola alcance un límite.
+Rechazar nuevas solicitudes cuando la cola alcance un lï¿½mite.
 Responder con 429 o 503 cuando no existan recursos disponibles.
-Utilizar PDFs de stress reales durante la evaluación.
+Utilizar PDFs de stress reales durante la evaluaciï¿½n.
 Analizar consumo de CPU y memoria por instancia.
-Comparar diferentes cantidades de réplicas.
+Comparar diferentes cantidades de rï¿½plicas.
 16. Reproducibilidad
 Instalar dependencias
 uv sync
@@ -274,15 +274,15 @@ tests/load/vegeta-target.txt
 y el reporte generado:
 
 tests/load/vegeta-report.txt
-17. Conclusión
+17. Conclusiï¿½n
 
-Se implementó un microservicio independiente para extracción de texto desde PDF, desacoplado del sistema monolítico original.
+Se implementï¿½ un microservicio independiente para extracciï¿½n de texto desde PDF, desacoplado del sistema monolï¿½tico original.
 
-La solución cumple con el endpoint requerido, utiliza procesamiento stateless, incorpora validaciones, manejo de errores, pruebas automatizadas, contenerización y límites explícitos de recursos.
+La soluciï¿½n cumple con el endpoint requerido, utiliza procesamiento stateless, incorpora validaciones, manejo de errores, pruebas automatizadas, contenerizaciï¿½n y lï¿½mites explï¿½citos de recursos.
 
-Las pruebas realizadas con k6 y Vegeta permitieron verificar el comportamiento del servicio bajo carga utilizando un PDF pequeño de prueba. En ambos casos se obtuvo un 100% de éxito y no se registraron errores HTTP.
+Las pruebas realizadas con k6 y Vegeta permitieron verificar el comportamiento del servicio bajo carga utilizando un PDF pequeï¿½o de prueba. En ambos casos se obtuvo un 100% de ï¿½xito y no se registraron errores HTTP.
 
-Los resultados constituyen una primera evaluación del comportamiento del microservicio. Para completar una evaluación de stress representativa del trabajo práctico, deben utilizarse los PDFs oficiales de mayor tamaño proporcionados por la cátedra y, posteriormente, comparar los resultados obtenidos con los valores de referencia.
+Los resultados constituyen una primera evaluaciï¿½n del comportamiento del microservicio. Para completar una evaluaciï¿½n de stress representativa del trabajo prï¿½ctico, deben utilizarse los PDFs oficiales de mayor tamaï¿½o proporcionados por la cï¿½tedra y, posteriormente, comparar los resultados obtenidos con los valores de referencia.
 
 18. Archivos relevantes
 Dockerfile

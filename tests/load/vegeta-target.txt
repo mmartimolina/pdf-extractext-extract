@@ -1,1 +1,3 @@
 POST http://host.docker.internal:8000/extract
+Content-Type: application/pdf
+@/tests/sample.pdf
