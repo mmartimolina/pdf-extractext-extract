@@ -7,7 +7,6 @@ services:
     environment:
       MAX_PDF_SIZE_BYTES: 20971520
       CONSUL_HTTP_ADDR: "${CONSUL_HTTP_ADDR:-}"
-      SERVICE_ADDRESS: "extract"
 
     cpus: "1.0"
     mem_limit: 1G
