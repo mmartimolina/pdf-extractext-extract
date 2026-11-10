@@ -6,6 +6,8 @@ services:
 
     environment:
       MAX_PDF_SIZE_BYTES: 20971520
+      CONSUL_HTTP_ADDR: "${CONSUL_HTTP_ADDR:-http://consul:8500}"
+      SERVICE_ADDRESS: "extract"
 
     cpus: "1.0"
     mem_limit: 1G
@@ -29,6 +31,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    networks:
+      - pdf-ecosystem
 
   nginx:
     image: nginx:alpine
@@ -38,3 +42,10 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - extract
+    networks:
+      - pdf-ecosystem
+
+networks:
+  pdf-ecosystem:
+    external: true
+    name: ${PDF_ECOSYSTEM_NETWORK:-pdf-ecosystem-net}
