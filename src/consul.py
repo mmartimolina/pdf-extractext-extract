@@ -10,6 +10,9 @@ import urllib.request
 
 logger = logging.getLogger(__name__)
 
+REGISTER_ATTEMPTS = 3
+REGISTER_RETRY_SECONDS = 2
+
 
 class ConsulRegistration:
     """Registra y desregistra una instancia mediante la API HTTP de Consul."""
@@ -20,7 +23,10 @@ class ConsulRegistration:
         self.service_id = os.environ.get(
             "CONSUL_SERVICE_ID", f"{service_name}-{socket.gethostname()}"
         )
-        self.service_address = os.environ.get("SERVICE_ADDRESS") or socket.gethostbyname(socket.gethostname())
+        self.service_address = os.environ.get(
+            "SERVICE_ADDRESS"
+        ) or socket.gethostbyname(socket.gethostname())
+        self.acl_token = os.environ.get("CONSUL_ACL_TOKEN", "")
         self.port = port
         self.health_path = health_path
         self.enabled = bool(self.address)
@@ -42,31 +48,62 @@ class ConsulRegistration:
                 "DeregisterCriticalServiceAfter": "1m",
             },
         }
-        try:
-            await asyncio.to_thread(self._request, "PUT", "/v1/agent/service/register", payload)
-            self.registered = True
-            logger.info("consul_service_registered service=%s id=%s", self.service_name, self.service_id)
-        except Exception:
-            logger.exception("consul_service_registration_failed service=%s", self.service_name)
+        for attempt in range(1, REGISTER_ATTEMPTS + 1):
+            try:
+                await asyncio.to_thread(
+                    self._request, "PUT", "/v1/agent/service/register", payload
+                )
+                self.registered = True
+                logger.info(
+                    "consul_service_registered service=%s id=%s attempt=%d",
+                    self.service_name,
+                    self.service_id,
+                    attempt,
+                )
+                return
+            except RuntimeError:
+                logger.warning(
+                    "consul_service_registration_attempt_failed "
+                    "service=%s id=%s attempt=%d/%d",
+                    self.service_name,
+                    self.service_id,
+                    attempt,
+                    REGISTER_ATTEMPTS,
+                )
+                if attempt < REGISTER_ATTEMPTS:
+                    await asyncio.sleep(REGISTER_RETRY_SECONDS)
+        logger.error(
+            "consul_service_registration_failed service=%s id=%s",
+            self.service_name,
+            self.service_id,
+        )
 
     async def deregister(self) -> None:
         if not self.enabled or not self.registered:
             return
         try:
             await asyncio.to_thread(
-                self._request, "PUT", f"/v1/agent/service/deregister/{self.service_id}", None
+                self._request,
+                "PUT",
+                f"/v1/agent/service/deregister/{self.service_id}",
+                None,
             )
             logger.info("consul_service_deregistered service=%s", self.service_name)
-        except Exception:
-            logger.exception("consul_service_deregister_failed service=%s", self.service_name)
+        except RuntimeError:
+            logger.exception(
+                "consul_service_deregister_failed service=%s", self.service_name
+            )
 
     def _request(self, method: str, path: str, payload: dict | None) -> None:
         body = json.dumps(payload).encode() if payload is not None else None
+        headers = {"Content-Type": "application/json"}
+        if self.acl_token:
+            headers["X-Consul-Token"] = self.acl_token
         request = urllib.request.Request(
             f"{self.address}{path}",
             data=body,
             method=method,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         try:
             with urllib.request.urlopen(request, timeout=3):

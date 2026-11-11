@@ -17,10 +17,11 @@ class FakeRequest:
 
 
 def test_declared_content_length_over_limit_is_rejected_early():
-    chunks_read: list[bytes] = []
 
     async def stream():
-        raise AssertionError("stream must not be read when Content-Length is over the limit")
+        raise AssertionError(
+            "stream must not be read when Content-Length is over the limit"
+        )
         yield b""
 
     request = FakeRequest(chunks=[b"x"], headers={"content-length": "999999999"})
@@ -38,9 +39,7 @@ def test_streaming_body_over_limit_is_capped_without_content_length():
 
 
 def test_unparseable_content_length_falls_back_to_streaming():
-    request = FakeRequest(
-        chunks=[b"abc", b"def"], headers={"content-length": "!bad!"}
-    )
+    request = FakeRequest(chunks=[b"abc", b"def"], headers={"content-length": "!bad!"})
 
     body = asyncio.run(read_body_with_limit(request, 100))
 

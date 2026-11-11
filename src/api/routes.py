@@ -27,9 +27,7 @@ async def read_body_with_limit(request: Request, limit: int) -> bytes:
     async for chunk in request.stream():
         total += len(chunk)
         if total > limit:
-            raise PdfTooLargeError(
-                f"PDF size exceeds limit of {limit} bytes"
-            )
+            raise PdfTooLargeError(f"PDF size exceeds limit of {limit} bytes")
         chunks.append(chunk)
     return b"".join(chunks)
 
@@ -41,7 +39,9 @@ async def health() -> dict:
 
 @router.post("/extract")
 async def extract(request: Request) -> JSONResponse:
-    content_type = (request.headers.get("content-type") or "").split(";")[0].strip().lower()
+    content_type = (
+        (request.headers.get("content-type") or "").split(";")[0].strip().lower()
+    )
     if content_type not in PDF_CONTENT_TYPES:
         return JSONResponse(
             status_code=415,
