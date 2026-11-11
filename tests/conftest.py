@@ -10,9 +10,7 @@ def build_pdf(text: str = "Hello World", pages: int = 1) -> bytes:
     objects.append(b"<< /Type /Catalog /Pages 2 0 R >>")
 
     kids = " ".join(f"{3 + i} 0 R" for i in range(pages))
-    objects.append(
-        f"<< /Type /Pages /Kids [{kids}] /Count {pages} >>".encode()
-    )
+    objects.append(f"<< /Type /Pages /Kids [{kids}] /Count {pages} >>".encode())
 
     font_obj_num = 3 + pages * 2
     for i in range(pages):
@@ -28,8 +26,11 @@ def build_pdf(text: str = "Hello World", pages: int = 1) -> bytes:
     stream = f"BT /F1 24 Tf 100 700 Td ({text}) Tj ET".encode()
     for _ in range(pages):
         objects.append(
-            b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n"
-            + stream + b"\nendstream"
+            b"<< /Length "
+            + str(len(stream)).encode()
+            + b" >>\nstream\n"
+            + stream
+            + b"\nendstream"
         )
 
     objects.append(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")

@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from src.domain.errors import PdfTooLargeError
 from src.main import create_app
 
+
 def make_client() -> TestClient:
     return TestClient(create_app(), raise_server_exceptions=False)
 
@@ -100,8 +101,10 @@ def test_extract_rejects_pdf_over_size_limit(valid_pdf_bytes, monkeypatch):
 
     assert response.status_code == 413
 
+
 def test_extract_handles_service_size_error(valid_pdf_bytes, monkeypatch):
     with make_client() as client:
+
         def raise_size_error(_):
             raise PdfTooLargeError("PDF too large")
 
@@ -120,8 +123,10 @@ def test_extract_handles_service_size_error(valid_pdf_bytes, monkeypatch):
     assert response.status_code == 413
     assert response.json()["detail"] == "PDF too large"
 
+
 def test_extract_handles_unexpected_error(valid_pdf_bytes, monkeypatch):
     with make_client() as client:
+
         def raise_unexpected_error(_):
             raise RuntimeError("unexpected failure")
 

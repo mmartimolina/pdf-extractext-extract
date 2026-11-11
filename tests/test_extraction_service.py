@@ -16,7 +16,9 @@ class FakeExtractor:
 
 def make_service(max_size: int = 1024) -> tuple[ExtractionService, FakeExtractor]:
     extractor = FakeExtractor()
-    return ExtractionService(extractor=extractor, max_pdf_size_bytes=max_size), extractor
+    return ExtractionService(
+        extractor=extractor, max_pdf_size_bytes=max_size
+    ), extractor
 
 
 def test_service_delegates_to_extractor():

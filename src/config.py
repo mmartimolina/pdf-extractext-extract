@@ -16,9 +16,7 @@ def load_settings() -> Settings:
     try:
         value = int(raw)
     except ValueError as exc:
-        raise ValueError(
-            f"MAX_PDF_SIZE_BYTES must be an integer, got {raw!r}"
-        ) from exc
+        raise ValueError(f"MAX_PDF_SIZE_BYTES must be an integer, got {raw!r}") from exc
     if value <= 0:
         raise ValueError("MAX_PDF_SIZE_BYTES must be positive")
     return Settings(max_pdf_size_bytes=value)

@@ -23,7 +23,8 @@ src/
 │   ├── models.py           #   ExtractedText
 │   └── errors.py           #   InvalidPdfError, PdfTooLargeError
 ├── config.py               # Settings (variables de entorno)
-└── main.py                 # create_app(): composition root
+├── consul.py               # Registro dinámico en Consul (opcional)
+└── main.py                 # create_app(): composition root + lifespan
 ```
 
 ## API
@@ -54,9 +55,28 @@ src/
 
 ## Configuración
 
-| Variable             | Default              | Descripción                     |
-|----------------------|----------------------|---------------------------------|
-| `MAX_PDF_SIZE_BYTES` | `20971520` (20 MB)   | Tamaño máximo de PDF aceptado   |
+| Variable             | Default                     | Descripción                                              |
+|----------------------|-----------------------------|----------------------------------------------------------|
+| `MAX_PDF_SIZE_BYTES` | `20971520` (20 MB)          | Tamaño máximo de PDF aceptado                            |
+| `CONSUL_HTTP_ADDR`   | `http://consul:8500`        | Dirección del agente Consul (vacío deshabilita registro) |
+| `CONSUL_SERVICE_ID`  | `extract-<hostname>`        | ID único de la instancia en Consul                       |
+| `SERVICE_ADDRESS`    | IP del contenedor           | Dirección con la que se registra la instancia            |
+| `CONSUL_ACL_TOKEN`   | (vacío)                     | Token ACL opcional para registrar el servicio            |
+
+## Escalabilidad: réplicas, balanceo y Consul
+
+- `docker-compose.yml` define **3 réplicas** con límites de 1 CPU y 1 GB por instancia
+  (configurables hasta 5 según la consigna).
+- El servicio es **stateless**: cualquier réplica puede atender cualquier request.
+- **Nginx** actúa como reverse proxy y balanceador en el puerto `8002:8000`,
+  resolviendo las réplicas vía Docker DNS (`server extract:8000 resolve`) con `least_conn`.
+- Cada réplica se **registra dinámicamente en Consul** al iniciar (lifespan de FastAPI)
+  con su IP de contenedor y un healthcheck HTTP contra `/health` cada 10 s.
+  Al detenerse se desregistra. Si Consul no responde, el servicio sigue funcionando
+  (registro fail-soft con 3 reintentos).
+- Los servicios estáticos (`pdf-validation`, `pdf-summarize`, `pdf-persistence`,
+  `pdf-extract`) se registran por configuración del servidor Consul
+  (`services.json` en el repositorio de summarize).
 
 ## Uso
 
@@ -81,4 +101,13 @@ curl -X POST http://localhost:8000/extract \
 uv run pytest
 ```
 
-Incluye tests unitarios (servicio, adaptador pypdf, configuración) y de integración (endpoints HTTP con `TestClient`), con cobertura vía `pytest-cov`.
+Incluye tests unitarios (servicio, adaptador pypdf, configuración, registro Consul) y de integración (endpoints HTTP con `TestClient`), con cobertura vía `pytest-cov`.
+
+## Red compartida del ecosistema
+
+El compose usa la red externa compartida `pdf-ecosystem-net` (variable `PDF_ECOSYSTEM_NETWORK`), donde también viven Consul, `pdf-validation`, `pdf-summarize`, `pdf-persistence` y MongoDB:
+
+```bash
+docker network create pdf-ecosystem-net   # solo la primera vez
+docker compose up -d --build
+```

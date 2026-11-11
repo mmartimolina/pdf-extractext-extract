@@ -16,18 +16,14 @@ class PypdfTextExtractor:
                 raise InvalidPdfError("The uploaded PDF is password-protected")
 
             page_count = document.page_count
-            text = "\n".join(
-                page.get_text() or "" for page in document
-            ).strip()
+            text = "\n".join(page.get_text() or "" for page in document).strip()
 
             document.close()
 
         except InvalidPdfError:
             raise
         except Exception as exc:
-            raise InvalidPdfError(
-                "The uploaded file is not a valid PDF"
-            ) from exc
+            raise InvalidPdfError("The uploaded file is not a valid PDF") from exc
 
         return ExtractedText(
             content=text,
